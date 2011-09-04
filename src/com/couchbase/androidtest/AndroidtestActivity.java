@@ -47,9 +47,10 @@ public class AndroidtestActivity extends Activity {
 //		CouchDbConnector testResultDb = dbInstance.createConnector("test-results", true);		
 //		CouchDbConnector replicationDb = dbInstance.createConnector("test-replication", true);
 		ReplicationCommand pullReplication = new ReplicationCommand.Builder()
-		.source("http://couchbase.iriscouch.com/gerrit")
+		.source("http://single.couchbase.net/gerrit")
 		.target("test-replication")
-		.continuous(false)
+		.continuous(true)
+		.createTarget(true)
 		.build();
 	
 		dbInstance.replicate(pullReplication);
