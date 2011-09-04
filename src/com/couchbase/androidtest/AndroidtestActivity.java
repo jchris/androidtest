@@ -2,6 +2,14 @@ package com.couchbase.androidtest;
 
 import com.couchbase.android.CouchbaseMobile;
 import com.couchbase.android.ICouchbaseDelegate;
+
+import org.ektorp.CouchDbConnector;
+import org.ektorp.CouchDbInstance;
+import org.ektorp.ReplicationCommand;
+import org.ektorp.http.AndroidHttpClient;
+import org.ektorp.http.HttpClient;
+import org.ektorp.impl.StdCouchDbInstance;
+
 import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -33,6 +41,20 @@ public class AndroidtestActivity extends Activity {
        
     }
 
+    public void kickoffWorkload(String host, int port) {
+		HttpClient httpClient = new AndroidHttpClient.Builder().host(host).port(port).build();
+		CouchDbInstance dbInstance = new StdCouchDbInstance(httpClient);
+//		CouchDbConnector testResultDb = dbInstance.createConnector("test-results", true);		
+//		CouchDbConnector replicationDb = dbInstance.createConnector("test-replication", true);
+		ReplicationCommand pullReplication = new ReplicationCommand.Builder()
+		.source("http://couchbase.iriscouch.com/gerrit")
+		.target("test-replication")
+		.continuous(false)
+		.build();
+	
+		dbInstance.replicate(pullReplication);
+    }
+    
     public void updateBatteryCondition(int level)
     {
     textView.setText( level + "%" );
@@ -51,6 +73,7 @@ public class AndroidtestActivity extends Activity {
 		@Override
 		public void couchbaseStarted(String host, int port) {
 			Log.v(TAG, "Couchbase has started");
+			kickoffWorkload(host, port);
 		}
 
 		@Override
